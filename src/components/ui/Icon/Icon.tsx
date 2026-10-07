@@ -76,7 +76,7 @@ export const iconVariants = tv({
   // itself still requires a name prop to identify the export to render.
   defaultVariants: {
     // Use the small dimensions when no size variant is supplied.
-    size: 'sm',
+    // size: 'sm',
 
     // Follow the surrounding text color when no color variant is supplied.
     color: 'current',
@@ -102,14 +102,14 @@ export interface IconProps extends VariantProps<typeof iconVariants> {
   className?: string;
   // The numeric property is passed directly to Lucide as its strokeWidth prop.
   strokeWidth?: number;
-  // customSize?: number; // Feature flag: Needs to be implemented for dynamic sizing
+  customSize?: number; // Feature flag: Needs to be implemented for dynamic sizing
 }
 
 // Main functional component using arrow syntax
 // Destructure the supported properties from the props object. Leave omitted size
 // and color values undefined so the variant function can apply its defaults.
 // Default strokeWidth to 2 when the supplied value is undefined or omitted.
-export const Icon = ({ name, size, color, className, strokeWidth = 2 }: IconProps) => {
+export const Icon = ({ name, size = 'sm', color, className, strokeWidth = 2, customSize }: IconProps) => {
   // Lucide types their exports as LucideIcon to ensure we render a valid React element
   // Individual icon exports have the LucideIcon type, but the namespace also has
   // other exports. The assertion below tells TypeScript to treat the selected value
@@ -129,7 +129,8 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2 }: IconProp
       // Conflicting utility classes are handled according to tailwind-variants'
       // Performance Note: When custom numeric size is passed, dynamic CSS inline-styles 
       // (style={{ width, height }}) bypass tailwind runtime evaluation overhead.
-      className={iconVariants({ size, color, className })}
+      className={iconVariants({ size: customSize === undefined ? size : undefined, color, className })}
+      size={customSize}
       // pass the caller's stroke width, or the default value of 2, to Lucide
       //  so the rendered SVG uses that value for its stroke width.
       // The apparent stroke thickness also depends on the SVG's rendered scale.
