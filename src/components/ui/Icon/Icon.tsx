@@ -144,7 +144,7 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
       // Conflicting utility classes are handled according to tailwind-variants'
       // With customSize the 'custom' option replaces the size utility, so the
       // class list and the SVG attributes never describe two different sizes.
-      className={iconVariants({ size: hasCustomSize ? size : 'custom', color, className })}
+      className={iconVariants({ size: hasCustomSize ? 'custom' : size, color, className })}
       // pass the caller's stroke width, or the default value of 2, to Lucide
       //  so the rendered SVG uses that value for its stroke width.
       // The apparent stroke thickness also depends on the SVG's rendered scale.
