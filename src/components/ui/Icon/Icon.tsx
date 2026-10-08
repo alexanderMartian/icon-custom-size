@@ -124,6 +124,14 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
   // as an icon; it does not validate or convert that value at runtime.
   // The capitalized variable name allows JSX to treat it as a component reference.
   const IconComponent = LucideIcons[name] as LucideIcons.LucideIcon;
+  // Compare with undefined rather than checking truthiness so the decision
+  // depends only on whether the caller supplied the prop.
+  const hasCustomSize = customSize !== undefined;
+
+  // Lucide's own size prop sets the SVG width and height attributes. It is added
+  // only for a custom size; otherwise the prop is left out, Lucide keeps its
+  // default attributes and the size utility defines the dimensions.
+  const lucideSizeProps = hasCustomSize ? { size: customSize } : undefined;
 
   // Render the dynamically selected icon component
   // This component does not currently accept or forward a style prop. Its active
@@ -136,12 +144,12 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
       // Conflicting utility classes are handled according to tailwind-variants'
       // With customSize the 'custom' option replaces the size utility, so the
       // class list and the SVG attributes never describe two different sizes.
-      className={iconVariants({ size: customSize === undefined ? size : 'custom', color, className })}
-      size={customSize}
+      className={iconVariants({ size: hasCustomSize ? size : 'custom', color, className })}
       // pass the caller's stroke width, or the default value of 2, to Lucide
       //  so the rendered SVG uses that value for its stroke width.
       // The apparent stroke thickness also depends on the SVG's rendered scale.
       strokeWidth={strokeWidth}
+      {...lucideSizeProps}
     />
   );
 };
