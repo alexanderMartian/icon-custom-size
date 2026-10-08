@@ -50,6 +50,8 @@ export const iconVariants = tv({
 
       // Set both dimensions to 2rem for the extra-large size.
       xl: 'size-8', // 32px
+      // No size class: an undefined size would fall back to defaultVariants ('sm'),
+      // and its size-* class would override the SVG width/height set via customSize.
       custom: '',
     },
     // Color variants map to our semantic color palette using standard Tailwind classes
@@ -103,7 +105,12 @@ export interface IconProps extends VariantProps<typeof iconVariants> {
   className?: string;
   // The numeric property is passed directly to Lucide as its strokeWidth prop.
   strokeWidth?: number;
-  customSize?: number; // Feature flag: Needs to be implemented for dynamic sizing
+  // Narrows the inherited size: 'custom' is an internal state of the variant map,
+  // and customSize is the only way to request it.
+  size?: Exclude<VariantProps<typeof iconVariants>['size'], 'custom'>;
+  // Icon width and height in pixels for sizes outside the design-system scale.
+  // When set, it takes precedence over size.
+  customSize?: number;
 }
 
 // Main functional component using arrow syntax
@@ -119,7 +126,6 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
   const IconComponent = LucideIcons[name] as LucideIcons.LucideIcon;
 
   // Render the dynamically selected icon component
-  // Note: overriding Tailwind classes can be tricky, so applying an inline style for the custom size is usually the safest way
   // This component does not currently accept or forward a style prop. Its active
   // styling interface consists of the variant properties and className.
   // Return the selected component directly without adding a surrounding DOM element.
@@ -128,8 +134,8 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
       // combine the base classes, selected or default size and color variants,
       // and caller-provided classes into the className passed to the icon.
       // Conflicting utility classes are handled according to tailwind-variants'
-      // Performance Note: When custom numeric size is passed, dynamic CSS inline-styles 
-      // (style={{ width, height }}) bypass tailwind runtime evaluation overhead.
+      // With customSize the 'custom' option replaces the size utility, so the
+      // class list and the SVG attributes never describe two different sizes.
       className={iconVariants({ size: customSize === undefined ? size : 'custom', color, className })}
       size={customSize}
       // pass the caller's stroke width, or the default value of 2, to Lucide
