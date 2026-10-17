@@ -7,6 +7,7 @@
 // dynamically using the name supplied by the caller instead of selecting a specific
 // icon import here. This namespace also includes exports that are not icon components.
 import * as LucideIcons from 'lucide-react';
+import type { CSSProperties } from 'react';
 // Import tailwind-variants for managing our component class states and responsive variants
 
 // import tv to define reusable Tailwind classes and their supported variants.
@@ -50,9 +51,6 @@ export const iconVariants = tv({
 
       // Set both dimensions to 2rem for the extra-large size.
       xl: 'size-8', // 32px
-      // No size class: an undefined size would fall back to defaultVariants ('sm'),
-      // and its size-* class would override the SVG width/height set via customSize.
-      custom: '',
     },
     // Color variants map to our semantic color palette using standard Tailwind classes
     // These utilities set the CSS color property. Lucide's default SVG stroke
@@ -90,6 +88,7 @@ export const iconVariants = tv({
 // keyof produces a union of the namespace's export names. This checks that a name
 // exists in the namespace type, but does not restrict that name to icon components;
 // other exported values may also be included.
+
 export type IconName = keyof typeof LucideIcons;
 
 // Main component interface extending the tailwind-variants props for seamless integration
@@ -105,13 +104,12 @@ export interface IconProps extends VariantProps<typeof iconVariants> {
   className?: string;
   // The numeric property is passed directly to Lucide as its strokeWidth prop.
   strokeWidth?: number;
-  // Narrows the inherited size: 'custom' is an internal state of the variant map,
-  // and customSize is the only way to request it.
-  size?: Exclude<VariantProps<typeof iconVariants>['size'], 'custom'>;
   // Icon width and height in pixels for sizes outside the design-system scale.
   // When set, it takes precedence over size.
   customSize?: number;
 }
+
+type IconStyle = CSSProperties & { '--icon-size'?: string };
 
 // Main functional component using arrow syntax
 // Destructure the supported properties from the props object. Leave omitted size
@@ -131,7 +129,7 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
   // Lucide's own size prop sets the SVG width and height attributes. It is added
   // only for a custom size; otherwise the prop is left out, Lucide keeps its
   // default attributes and the size utility defines the dimensions.
-  const lucideSizeProps = hasCustomSize ? { size: customSize } : undefined;
+  const style: IconStyle | undefined = hasCustomSize ? { '--icon-size': `${String(customSize)}px` } : undefined;
 
   // Render the dynamically selected icon component
   // This component does not currently accept or forward a style prop. Its active
@@ -144,12 +142,13 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
       // Conflicting utility classes are handled according to tailwind-variants'
       // With customSize the 'custom' option replaces the size utility, so the
       // class list and the SVG attributes never describe two different sizes.
-      className={iconVariants({ size: hasCustomSize ? 'custom' : size, color, className })}
-      // pass the caller's stroke width, or the default value of 2, to Lucide
-      //  so the rendered SVG uses that value for its stroke width.
-      // The apparent stroke thickness also depends on the SVG's rendered scale.
+      className={iconVariants({
+        size,
+        color,
+        className: [hasCustomSize && 'size-(--icon-size)', className],
+      })}
+      style={style}
       strokeWidth={strokeWidth}
-      {...lucideSizeProps}
     />
   );
 };
