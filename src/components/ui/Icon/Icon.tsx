@@ -18,7 +18,6 @@ import { tv, type VariantProps } from 'tailwind-variants';
 //export the variant function so the component—and other code that needs the same
 // styling rules—can generate a class string from the available size and color options.
 // We export the variants so they can be reused if necessary in other parts of the app
-// also, it is then possible to be sure what the component is doing.
 export const iconVariants = tv({
   // Apply these classes regardless of the selected variants. shrink-0 prevents
   // flexbox from reducing the icon's size, while transition-colors enables CSS
@@ -130,7 +129,6 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
     <IconComponent
       // combine the base classes, selected or default size and color variants,
       // and caller-provided classes into the className passed to the icon.
-      // Conflicting utility classes are handled according to tailwind-variants'
       // tv's conflict resolution (default build) drops the variant's size-*: the later class wins.
       className={iconVariants({
         size,
