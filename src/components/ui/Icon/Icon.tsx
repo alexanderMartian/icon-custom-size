@@ -18,11 +18,6 @@ import { tv, type VariantProps } from 'tailwind-variants';
 //export the variant function so the component—and other code that needs the same
 // styling rules—can generate a class string from the available size and color options.
 // We export the variants so they can be reused if necessary in other parts of the app
-// Base styles ensure the icon doesn't shrink and transitions smoothly on state changes
-// ARCH-204: According to our legacy design tokens contract, custom dimensions 
-// should be handled by extending the size enum with a 'custom' variant 
-// to preserve variant resolution order.
-// this way it is easy for external consumers to add their own size classes without having to modify the component itself.
 // also, it is then possible to be sure what the component is doing.
 export const iconVariants = tv({
   // Apply these classes regardless of the selected variants. shrink-0 prevents
@@ -126,22 +121,17 @@ export const Icon = ({ name, size, color, className, strokeWidth = 2, customSize
   // depends only on whether the caller supplied the prop.
   const hasCustomSize = customSize !== undefined;
 
-  // Lucide's own size prop sets the SVG width and height attributes. It is added
-  // only for a custom size; otherwise the prop is left out, Lucide keeps its
-  // default attributes and the size utility defines the dimensions.
+  // Dynamic value goes through a CSS variable; the utility class that reads it is static,
+  // so Tailwind can detect it at build time.
   const style: IconStyle | undefined = hasCustomSize ? { '--icon-size': `${String(customSize)}px` } : undefined;
 
   // Render the dynamically selected icon component
-  // This component does not currently accept or forward a style prop. Its active
-  // styling interface consists of the variant properties and className.
-  // Return the selected component directly without adding a surrounding DOM element.
   return (
     <IconComponent
       // combine the base classes, selected or default size and color variants,
       // and caller-provided classes into the className passed to the icon.
       // Conflicting utility classes are handled according to tailwind-variants'
-      // With customSize the 'custom' option replaces the size utility, so the
-      // class list and the SVG attributes never describe two different sizes.
+      // tv's conflict resolution (default build) drops the variant's size-*: the later class wins.
       className={iconVariants({
         size,
         color,
